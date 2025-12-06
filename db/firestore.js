@@ -3,8 +3,8 @@ const admin = require('firebase-admin');
 
 let serviceAccount;
 
-if (process.env.SERVICE_ACCOUNT_KEY) {
-    serviceAccount = JSON.parse(process.env.SERVICE_ACCOUNT_KEY);
+if (process.env.FIREBASE_CREDENTIALS_JSON) {
+    serviceAccount = JSON.parse(process.env.FIREBASE_CREDENTIALS_JSON);
 } else {
     // Fallback for local development
     try {
