@@ -2,9 +2,14 @@
 const express = require('express');
 const auditLog = require('./middleware/auditLog');
 const itemRoutes = require('./routes/items');
+const redisClient = require('./db/redis');
+const db = require('./db/firestore');
 
 const app = express();
 const port = 3000;
+
+// Connect to Redis
+redisClient.connect().catch(console.error);
 
 // Apply middlewares
 app.use(auditLog);

@@ -1,0 +1,18 @@
+
+services:
+  - type: web
+    name: my-express-app
+    env: node
+    plan: free
+    buildCommand: npm install
+    startCommand: node index.js
+    envVars:
+      - key: NODE_VERSION
+        value: 18
+      - fromService:
+          type: redis
+          name: redis-cache
+          envVarKey: REDIS_URL
+  - type: redis
+    name: redis-cache
+    plan: free
