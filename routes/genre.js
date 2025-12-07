@@ -39,7 +39,7 @@ router.post('/', async (req, res) => {
     const response = new ApiResponse(res);
     try {
         const newGenre = await genreService.createGenre(req.body);
-        await metadataService.updateVersion('genres');
+        await metadataService.updateVersion('genre');
         logger.info(`New genre created with id: ${newGenre.id}`);
         response.created(newGenre);
     } catch (error) {
@@ -53,7 +53,7 @@ router.put('/:id', async (req, res) => {
     const response = new ApiResponse(res);
     try {
         const updatedGenre = await genreService.updateGenre(req.params.id, req.body);
-        await metadataService.updateVersion('genres');
+        await metadataService.updateVersion('genre');
         logger.info(`Genre with id: ${req.params.id} updated`);
         response.success(updatedGenre);
     } catch (error) {
@@ -67,7 +67,7 @@ router.delete('/:id', async (req, res) => {
     const response = new ApiResponse(res);
     try {
         await genreService.deleteGenre(req.params.id);
-        await metadataService.updateVersion('genres');
+        await metadataService.updateVersion('genre');
         logger.info(`Genre with id: ${req.params.id} deleted`);
         response.success({ message: "Genre deleted successfully" });
     } catch (error) {
