@@ -10,7 +10,7 @@ const logger = require('../utils/logger');
 router.get('/', async (req, res) => {
   const response = new ApiResponse(res);
   try {
-      const items = await itemService.getAllItems();
+      const items = await itemService.getAllItem();
       response.success(items);
    } catch (error) {
           logger.error(`Error fetching items: ${error.message}`);
