@@ -9,11 +9,16 @@ const auditLog = (req, res, next) => {
     const start = new Date();
     const { method, originalUrl } = req;
 
+    // 1. Log khi bắt đầu xử lý yêu cầu
+    logger.info(`BEGIN ${method} ${originalUrl} | Request Start`);
+
     res.on('finish', () => {
       const duration = new Date() - start;
       const { statusCode } = res;
-      logger.info(`${method} ${originalUrl} ${statusCode} - ${duration}ms`);
+      // 2. Log khi kết thúc yêu cầu (đã bao gồm status code và thời gian xử lý)
+      logger.info(`END ${method} ${originalUrl} | ${statusCode} | ${duration}ms | Request End`);
     });
+
     next();
   });
 };

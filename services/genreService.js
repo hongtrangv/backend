@@ -10,11 +10,10 @@ if (!redisClient.isOpen) {
 
 const getGenres = async () => {
   try {
-    const firestoreVersion = await metadataService.getVersion('genres');
-    const redisVersion = await redisClient.get('version:genre');
-    logger.info(`Firestore version: ${firestoreVersion}, Redis version: ${redisVersion}`);
+    const firestoreVersion = await metadataService.getVersion('genre');
+    const redisVersion = await redisClient.get('version:genre');    
     if (firestoreVersion && redisVersion && firestoreVersion === redisVersion) {
-        const cachedGenres = await redisClient.get('genres');
+        const cachedGenres = await redisClient.get('cache:genre');
         if (cachedGenres) {
             logger.info('Fetching genres from Redis cache');
             return JSON.parse(cachedGenres);
@@ -30,11 +29,11 @@ const getGenres = async () => {
   const genres = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
 
   try {
-      const firestoreVersion = await metadataService.getVersion('genres');
+      const firestoreVersion = await metadataService.getVersion('genre');
       if (firestoreVersion) {
         logger.info('Setting genre cache in Redis');
-        await redisClient.set('genres', JSON.stringify(genres));
-        await redisClient.set('genres_version', firestoreVersion);
+        await redisClient.set('cache:genre', JSON.stringify(genres));
+        await redisClient.set('version:genre', firestoreVersion);
       }
   } catch (error) {
       logger.error(`Redis error in getGenres (set cache): ${error.message}`);
