@@ -1,6 +1,7 @@
 require('dotenv').config();
 const express = require('express');
 const auditLog = require('./middleware/auditLog');
+const basicAuth = require('./middleware/basicAuth'); // Import basicAuth
 const itemRoutes = require('./routes/items');
 const genreRoutes = require('./routes/genre');
 const metaDataRoutes = require('./routes/metadata');
@@ -15,24 +16,21 @@ const port = 3000;
 redisClient.connect().catch(console.error);
 
 // Apply middlewares
-app.use(auditLog);
-app.use(express.json());
+app.use(express.json()); // Body parser should come early
+app.use(auditLog); // For logging all requests
 
-// Root route
+// Root route (does not require auth)
 app.get('/', (req, res) => {
   res.send('Hello World! Your app is now refactored!');
 });
 
-// Use the item routes
+// Apply basic authentication to all API routes
+app.use('/api', basicAuth);
+
+// API Routes
 app.use('/api/items', itemRoutes);
-
-// Use the book routes
-app.use('/api/books', bookRoutes); // Use the new book routes
-
-// Use the genre
+app.use('/api/books', bookRoutes);
 app.use('/api/genres', genreRoutes);
-
-// Use the metaData
 app.use('/api/metadata', metaDataRoutes);
 
 // Start the server
