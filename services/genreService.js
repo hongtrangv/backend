@@ -13,7 +13,7 @@ const getGenres = async () => {
   const redisVersion = await redisClient.get('version:genre');    
   try {
     logger.info(`Firestore version: ${firestoreVersion}, Redis version: ${redisVersion}`);
-    if (firestoreVersion && redisVersion && firestoreVersion === redisVersion) {
+    if (firestoreVersion && redisVersion && String(firestoreVersion) === String(redisVersion)) {
       logger.info('Using cached genres from Redis');       
       const cachedGenres = await redisClient.get('cache:genre');
         logger.info(`Using cached genres from Redis ${cachedGenres}`);
