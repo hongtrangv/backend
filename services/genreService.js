@@ -14,6 +14,7 @@ const getGenres = async () => {
     const redisVersion = await redisClient.get('version:genre');    
     if (firestoreVersion && redisVersion && firestoreVersion === redisVersion) {
         const cachedGenres = await redisClient.get('cache:genre');
+        logger.info(`Using cached genres from Redis ${cachedGenres}`);
         if (cachedGenres) {
             logger.info('Fetching genres from Redis cache');
             return JSON.parse(cachedGenres);
@@ -52,7 +53,7 @@ const getGenreById = async (id) => {
 };
 
 const createGenre = async (genreData) => {
-    logger.info('Creating new genre in Firestore');
+    logger.info(`Creating new genre in Firestore ${JSON.stringify(genreData)}`);
     const docRef = await db.collection('genre').add(genreData);
     return { id: docRef.id, ...genreData };
 };
