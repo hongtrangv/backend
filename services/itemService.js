@@ -1,24 +1,30 @@
 const { MemoryDatabase } = require('../db/database');
+const Logger = require('../utils/logger');
 
 const db = new MemoryDatabase();
 
-const getItems = (filters) => {
+const getItems = (req, filters) => {
+  req.logger.info('Fetching all items');
   return db.getAll(filters);
 };
 
-const getItemById = (id) => {
+const getItemById = (req, id) => {
+  req.logger.info(`Fetching item with id: ${id}`);
   return db.getById(id);
 };
 
-const createItem = (item) => {
+const createItem = (req, item) => {
+  req.logger.info('Creating new item');
   return db.create(item);
 };
 
-const updateItem = (id, item) => {
+const updateItem = (req, id, item) => {
+  req.logger.info(`Updating item with id: ${id}`);
   return db.update(id, item);
 };
 
-const deleteItem = (id) => {
+const deleteItem = (req, id) => {
+  req.logger.info(`Deleting item with id: ${id}`);
   return db.delete(id);
 };
 

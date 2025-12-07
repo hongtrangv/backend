@@ -8,7 +8,7 @@ const ApiResponse = require('../utils/apiResponse');
 // Get all items with filtering
 router.get('/', async (req, res) => {
   const response = new ApiResponse(res);
-  const items = await itemService.getItems(req.query);
+  const items = await itemService.getItems(req, req.query);
   response.success(items);
 });
 
@@ -16,7 +16,7 @@ router.get('/', async (req, res) => {
 router.get('/:id', async (req, res) => {
   const response = new ApiResponse(res);
   const id = parseInt(req.params.id);
-  const item = await itemService.getItemById(id);
+  const item = await itemService.getItemById(req, id);
   if (item) {
     response.success(item);
   } else {
@@ -28,7 +28,7 @@ router.get('/:id', async (req, res) => {
 router.post('/', validate(createItemRules()), async (req, res) => {
     const response = new ApiResponse(res);
     // The body is already sanitized by the validator
-    const newItem = await itemService.createItem(req.body);
+    const newItem = await itemService.createItem(req, req.body);
     response.created(newItem);
 });
 
@@ -36,7 +36,7 @@ router.post('/', validate(createItemRules()), async (req, res) => {
 router.put('/:id', validate(updateItemRules()), async (req, res) => {
     const response = new ApiResponse(res);
     const id = parseInt(req.params.id);
-    const updatedItem = await itemService.updateItem(id, req.body);
+    const updatedItem = await itemService.updateItem(req, id, req.body);
     if (updatedItem) {
         response.success(updatedItem);
     } else {
@@ -48,7 +48,7 @@ router.put('/:id', validate(updateItemRules()), async (req, res) => {
 router.delete('/:id', async (req, res) => {
   const response = new ApiResponse(res);
   const id = parseInt(req.params.id);
-  const success = await itemService.deleteItem(id);
+  const success = await itemService.deleteItem(req, id);
   if (success) {
     response.noContent();
   } else {
