@@ -12,6 +12,7 @@ const getGenres = async () => {
   try {
     const firestoreVersion = await metadataService.getVersion('genre');
     const redisVersion = await redisClient.get('version:genre');    
+    logger.info(`Firestore version: ${firestoreVersion}, Redis version: ${redisVersion}`);
     if (firestoreVersion && redisVersion && firestoreVersion === redisVersion) {
         const cachedGenres = await redisClient.get('cache:genre');
         logger.info(`Using cached genres from Redis ${cachedGenres}`);
