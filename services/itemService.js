@@ -1,11 +1,40 @@
-const { MemoryDatabase } = require('../db/database');
+const db = require('../db/firestore');
+const redisClient = require('../db/redis');
+const metadataService = require('./metadataService');
 const logger = require('../utils/logger');
 
-const db = new MemoryDatabase();
+if (!redisClient.isOpen) {
+    redisClient.connect().catch(console.error);
+}
 
-const getItems = (filters) => {
-  logger.info('Fetching all items');
-  return db.getAll(filters);
+const getAllItem = async () => {
+  const firestoreVersion = await metadataService.getVersion('items');
+  const redisVersion = await redisClient.get('version:items');    
+  try {    
+    if (firestoreVersion && redisVersion && String(firestoreVersion) === String(redisVersion)) {
+      logger.info('Using cached items from Redis');       
+      const cachedItems = await redisClient.get('cache:items');        
+        if (cachedItems) {            
+            return JSON.parse(cachedGenres);
+        }
+    }else{
+        logger.info('Fetching items from Firestore');
+        const snapshot = await db.collection('items').get();
+        const items = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        try {      
+          if (firestoreVersion) {            
+            await redisClient.set('cache:items', JSON.stringify(items));
+            await redisClient.set('version:items', firestoreVersion);
+          }
+        } catch (error) {
+            logger.error(`Redis error in getAllItems (set cache): ${error.message}`);
+        }        
+        return items;
+        }
+  } catch (error) {
+      logger.error(`Redis error in getGenres: ${error.message}`);
+      // Fallback to Firestore
+  }
 };
 
 const getItemById = (id) => {
@@ -29,7 +58,7 @@ const deleteItem = (id) => {
 };
 
 module.exports = {
-  getItems,
+  getAllItem,
   getItemById,
   createItem,
   updateItem,
