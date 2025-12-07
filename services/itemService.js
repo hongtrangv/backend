@@ -15,7 +15,7 @@ const getAllItem = async () => {
       logger.info('Using cached items from Redis');       
       const cachedItems = await redisClient.get('cache:items');        
         if (cachedItems) {            
-            return JSON.parse(cachedGenres);
+            return JSON.parse(cachedItems);
         }
     }else{
         logger.info('Fetching items from Firestore');
