@@ -1,11 +1,11 @@
-class Logger {
-  constructor(requestId) {
-    this.requestId = requestId;
-  }
+const asyncLocalStorage = require('./context');
 
+class Logger {
   _log(level, message) {
+    const store = asyncLocalStorage.getStore();
+    const requestId = store ? store.requestId : 'N/A';
     const timestamp = new Date().toISOString();
-    console.log(`[${timestamp}] [${this.requestId}] [${level.toUpperCase()}] ${message}`);
+    console.log(`[${timestamp}] [${requestId}] [${level.toUpperCase()}] ${message}`);
   }
 
   info(message) {
@@ -21,4 +21,4 @@ class Logger {
   }
 }
 
-module.exports = Logger;
+module.exports = new Logger(); // Export a single instance
