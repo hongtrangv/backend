@@ -45,6 +45,42 @@ class EmbeddingService {
       throw error;
     }
   }
+  
+  async createSingleBookEmbedding(book) {
+    if (!book || !book.id) {
+        logger.info('No book or book ID provided to create a single embedding.');
+        return;
+    }
+
+    await this.#connectToRedis();
+    logger.info(`Generating embedding for single book ID: ${book.id}`);
+
+    const parts = [];
+    if (book.title) parts.push(`Title: ${book.title}`);
+    if (book.genre) parts.push(`Genre: ${book.genre}`);
+    if (book.description) parts.push(`Description: ${book.description}`);
+    if (book.author) parts.push(`Author: ${book.author}`);
+    const text = parts.join(', ');
+
+    const [embedding] = await this.#generateEmbeddings([text]);
+
+    if (embedding) {
+        await redisClient.hSet('book_embeddings', `book:${book.id}`, JSON.stringify(embedding));
+        logger.info(`Embedding stored for book ID: ${book.id}`);
+    } else {
+        logger.warn(`Could not generate embedding for book ID: ${book.id}`);
+    }
+  }
+
+  async deleteBookEmbedding(bookId) {
+    if (!bookId) {
+        logger.warn('No book ID provided to delete embedding.');
+        return;
+    }
+    await this.#connectToRedis();
+    await redisClient.hDel('book_embeddings', `book:${bookId}`);
+    logger.info(`Embedding deleted for book ID: ${bookId}`);
+  }
 
   async createBookEmbeddings(books) {
     if (!books || books.length === 0) {
@@ -56,11 +92,11 @@ class EmbeddingService {
     logger.info(`Generating embeddings for ${books.length} books...`);
 
     // Process books in smaller batches to conserve memory
-    const batchSize = 20;
+    const batchSize = 10;
     for (let i = 0; i < books.length; i += batchSize) {
         const batchBooks = books.slice(i, i + batchSize);
         logger.info(`Processing batch of ${batchBooks.length} books...`);
-
+        logger.info(`Total books: ${i * batchSize}`);
         const texts = batchBooks.map(book => {
             const parts = [];
             if (book.title) parts.push(`Title: ${book.title}`);

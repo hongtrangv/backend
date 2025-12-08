@@ -56,20 +56,25 @@ const getBookById = async (id) => {
 const createBook = async (bookData) => {
     logger.info(`Creating new book in Firestore ${JSON.stringify(bookData)}`);
     const docRef = await db.collection('books').add(bookData);
+    const newBook = { id: docRef.id, ...bookData };
+    await embeddingService.createSingleBookEmbedding(newBook); // Create embedding for the new book
     await metadataService.updateVersion('books'); // Invalidate cache
-    return { id: docRef.id, ...bookData };
+    return newBook;
 };
 
 const updateBook = async (id, bookData) => {
     logger.info(`Updating book in Firestore: ${id}`);
     await db.collection('books').doc(id).update(bookData);
+    const updatedBook = { id: id, ...bookData };
+    await embeddingService.createSingleBookEmbedding(updatedBook); // Update embedding for the book
     await metadataService.updateVersion('books'); // Invalidate cache
-    return { id: id, ...bookData };
+    return updatedBook;
 };
 
 const deleteBook = async (id) => {
     logger.info(`Deleting book from Firestore: ${id}`);
     await db.collection('books').doc(id).delete();
+    await embeddingService.deleteBookEmbedding(id); // Delete the book's embedding
     await metadataService.updateVersion('books'); // Invalidate cache
 };
 
