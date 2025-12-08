@@ -1,25 +1,38 @@
 const redisClient = require('../db/redis');
 const logger = require('../utils/logger');
 
-// In a real application, you would use a proper NLP model for this.
+const EMBEDDING_SIZE = 128;
+
+// Creates a deterministic, but simple, embedding from text.
 const generateEmbedding = (text) => {
-  // For demonstration, we'll generate a random vector.
-  // NOTE: With random vectors, the search results will also be random.
-  // For meaningful results, a real text embedding model is needed.
-  const embeddingSize = 128;
-  const embedding = Array.from({ length: embeddingSize }, () => Math.random());
-  return embedding;
+  const embedding = new Array(EMBEDDING_SIZE).fill(0);
+  if (!text) {
+    return embedding;
+  }
+
+  const lowerText = text.toLowerCase();
+
+  for (let i = 0; i < lowerText.length; i++) {
+    const charCode = lowerText.charCodeAt(i);
+    // Simple hashing: distribute character codes across the embedding vector
+    embedding[charCode % EMBEDDING_SIZE] += 1;
+  }
+
+  // Normalize the vector (L2 normalization) to have a unit length.
+  // This is crucial for cosine similarity to work correctly.
+  const magnitude = Math.sqrt(embedding.reduce((sum, val) => sum + val * val, 0));
+  if (magnitude === 0) {
+    return embedding; // Avoid division by zero
+  }
+
+  return embedding.map(val => val / magnitude);
 };
 
 // Calculates the cosine similarity between two vectors.
 const cosineSimilarity = (vecA, vecB) => {
   const dotProduct = vecA.reduce((sum, a, i) => sum + a * vecB[i], 0);
-  const magnitudeA = Math.sqrt(vecA.reduce((sum, a) => sum + a * a, 0));
-  const magnitudeB = Math.sqrt(vecB.reduce((sum, b) => sum + b * b, 0));
-  if (magnitudeA === 0 || magnitudeB === 0) {
-    return 0; // Avoid division by zero
-  }
-  return dotProduct / (magnitudeA * magnitudeB);
+  // Since vectors are normalized, their magnitudes are 1, so we can skip dividing by them.
+  return dotProduct;
 };
 
 class EmbeddingService {
@@ -30,12 +43,13 @@ class EmbeddingService {
     }
 
     const embeddingPromises = books.map(async (book) => {
+      // Now using the deterministic embedding function
       const embedding = generateEmbedding(book.title);
       return redisClient.hSet('book_embeddings', `book:${book.id}`, JSON.stringify(embedding));
     });
 
     await Promise.all(embeddingPromises);
-    logger.info('Book embeddings created and stored in Redis.');
+    logger.info('Book embeddings created and stored in Redis using deterministic logic.');
   }
 
   async searchBooksByEmbedding(query) {
@@ -64,9 +78,6 @@ class EmbeddingService {
     // 4. Sort by similarity score in descending order.
     similarityScores.sort((a, b) => b.score - a.score);
 
-    // 5. Fetch the actual book data for the top results.
-    // In this example, we'll just return the IDs and scores.
-    // A full implementation would fetch book details from the main book cache or DB.
     logger.info(`Found ${similarityScores.length} books, returning top results.`);
     return similarityScores;
   }
