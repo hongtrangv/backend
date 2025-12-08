@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const redisClient = require('../db/redis');
+const bookService = require('../services/bookService');
 const ApiResponse = require('../utils/apiResponse');
 
 // Get books from cache
@@ -12,17 +12,7 @@ router.get('/', async (req, res) => {
     const startIndex = (page - 1) * limit;
     const endIndex = page * limit;
 
-    let books;
-    const cachedBooks = await redisClient.get('cache:books');
-
-    if (cachedBooks) {
-      books = JSON.parse(cachedBooks);
-    } else {
-        // In a real application, you would fetch the data from your primary database here
-        // and then cache it in Redis.
-        books = Array.from({ length: 30 }, (_, i) => ({ id: i + 1, title: `Book ${i + 1}` }));
-        await redisClient.set('cache:books', JSON.stringify(books));
-    }
+    const books = await bookService.getBooks();
 
     const paginatedBooks = books.slice(startIndex, endIndex);
     const totalPages = Math.ceil(books.length / limit);
