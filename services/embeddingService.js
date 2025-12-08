@@ -41,40 +41,43 @@ class EmbeddingService {
 
   async createBookEmbeddings(books) {
     if (!books || books.length === 0) {
-      logger.info('No books provided to create embeddings.');
-      return;
+        logger.info('No books provided to create embeddings.');
+        return;
     }
 
     logger.info(`Generating embeddings for ${books.length} books...`);
 
-    const texts = books.map(book => {
-        const parts = [];
-        if (book.title) {
-            parts.push(`Title: ${book.title}`);
-        }
-        if (book.genre) {
-            parts.push(`Genre: ${book.genre}`);
-        }
-        if (book.description) {
-            parts.push(`Description: ${book.description}`);
-        }
-        if (book.author) {
-          parts.push(`Author: ${book.author}`);
-        }
-        return parts.join(', ');
-    });
-    const embeddings = await this.#generateEmbeddings(texts);
+    // Process books in smaller batches to conserve memory
+    const batchSize = 100;
+    for (let i = 0; i < books.length; i += batchSize) {
+        const batchBooks = books.slice(i, i + batchSize);
+        logger.info(`Processing batch of ${batchBooks.length} books...`);
 
-    const pipeline = redisClient.pipeline();
-    books.forEach((book, index) => {
-      if (embeddings[index]) {
-        pipeline.hSet('book_embeddings', `book:${book.id}`, JSON.stringify(embeddings[index]));
-      }
-    });
+        const texts = batchBooks.map(book => {
+            const parts = [];
+            if (book.title) parts.push(`Title: ${book.title}`);
+            if (book.genre) parts.push(`Genre: ${book.genre}`);
+            if (book.description) parts.push(`Description: ${book.description}`);
+            if (book.author) parts.push(`Author: ${book.author}`);
+            return parts.join(', ');
+        });
 
-    await pipeline.exec();
-    logger.info('Book embeddings have been recreated.');
-  }
+        const embeddings = await this.#generateEmbeddings(texts);
+        
+        const pipeline = redisClient.pipeline();
+        batchBooks.forEach((book, index) => {
+            if (embeddings[index]) {
+                pipeline.hSet('book_embeddings', `book:${book.id}`, JSON.stringify(embeddings[index]));
+            }
+        });
+
+        await pipeline.exec();
+        logger.info(`Batch of ${batchBooks.length} books processed and embeddings stored.`);
+    }
+
+    logger.info('All book embeddings have been recreated.');
+}
+
 
   async searchBooksByEmbedding(query) {
     logger.info(`Generating embedding for query: "${query}"`);
