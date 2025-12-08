@@ -2,6 +2,7 @@ require('dotenv').config();
 const redisClient = require('../db/redis');
 const logger = require('../utils/logger');
 
+// A singleton class to manage the embedding pipeline, so we only load the model once.
 class EmbeddingPipeline {
     static instance = null;
 
@@ -15,7 +16,6 @@ class EmbeddingPipeline {
     }
 }
 
-
 // Calculates the cosine similarity between two vectors.
 const cosineSimilarity = (vecA, vecB) => {
   if (!vecA || !vecB) return 0;
@@ -27,6 +27,13 @@ const cosineSimilarity = (vecA, vecB) => {
 };
 
 class EmbeddingService {
+
+  async #connectToRedis() {
+    if (!redisClient.isReady) {
+      await redisClient.connect();
+    }
+  }
+
   // Generates embeddings for a batch of texts using the local model.
   async #generateEmbeddings(texts) {
     try {
@@ -45,6 +52,7 @@ class EmbeddingService {
         return;
     }
 
+    await this.#connectToRedis();
     logger.info(`Generating embeddings for ${books.length} books...`);
 
     // Process books in smaller batches to conserve memory
@@ -64,22 +72,23 @@ class EmbeddingService {
 
         const embeddings = await this.#generateEmbeddings(texts);
         
-        const pipeline = redisClient.pipeline();
+        const multi = redisClient.multi();
         batchBooks.forEach((book, index) => {
             if (embeddings[index]) {
-                pipeline.hSet('book_embeddings', `book:${book.id}`, JSON.stringify(embeddings[index]));
+                multi.hSet('book_embeddings', `book:${book.id}`, JSON.stringify(embeddings[index]));
             }
         });
 
-        await pipeline.exec();
+        await multi.exec();
         logger.info(`Batch of ${batchBooks.length} books processed and embeddings stored.`);
     }
 
     logger.info('All book embeddings have been recreated.');
-}
+  }
 
 
   async searchBooksByEmbedding(query) {
+    await this.#connectToRedis();
     logger.info(`Generating embedding for query: "${query}"`);
     const [queryEmbedding] = await this.#generateEmbeddings([query]);
 
