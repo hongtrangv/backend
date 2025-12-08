@@ -48,7 +48,7 @@ class EmbeddingService {
     logger.info(`Generating embeddings for ${books.length} books...`);
 
     // Process books in smaller batches to conserve memory
-    const batchSize = 100;
+    const batchSize = 20;
     for (let i = 0; i < books.length; i += batchSize) {
         const batchBooks = books.slice(i, i + batchSize);
         logger.info(`Processing batch of ${batchBooks.length} books...`);
