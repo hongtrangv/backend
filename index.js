@@ -6,6 +6,7 @@ const itemRoutes = require('./routes/items');
 const genreRoutes = require('./routes/genre');
 const metaDataRoutes = require('./routes/metadata');
 const bookRoutes = require('./routes/books'); // Import the new book routes
+const searchRoutes = require('./routes/search');
 const redisClient = require('./db/redis');
 // const db = require('./db/firestore');
 
@@ -32,6 +33,7 @@ app.use('/api/items', itemRoutes);
 app.use('/api/books', bookRoutes);
 app.use('/api/genres', genreRoutes);
 app.use('/api/metadata', metaDataRoutes);
+app.use('/api/search', searchRoutes);
 
 // Start the server
 app.listen(port, () => {
