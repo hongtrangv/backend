@@ -27,7 +27,6 @@ const getSpending = async (year, month, type) => {
     }
 
     // Assuming the array of records is stored in a field named 'records'.
-    // If your field has a different name, please change 'records' here.
     const data = doc.data();
     const spendings = data.records || [];
 
@@ -36,7 +35,23 @@ const getSpending = async (year, month, type) => {
         return [];
     }
 
-    logger.info(`Successfully fetched ${spendings.length} items from document '${type}' for ${month}/${year}.`);
+    // Sort spendings by date in descending order (newest first).
+    // This robustly handles date strings, JS Date objects, and Firestore Timestamps.
+    spendings.sort((a, b) => {
+        // Push records without a date to the end.
+        if (!b.date) return -1;
+        if (!a.date) return 1;
+
+        // Create Date objects for robust comparison.
+        // This handles Firestore Timestamps (which have a .toDate() method) and standard date strings.
+        const dateA = new Date(a.date.toDate ? a.date.toDate() : a.date);
+        const dateB = new Date(b.date.toDate ? b.date.toDate() : b.date);
+        
+        // Sort descending (newest first). Invalid dates are handled gracefully.
+        return dateB - dateA;
+    });
+
+    logger.info(`Successfully fetched and sorted ${spendings.length} items from document '${type}' for ${month}/${year}.`);
     return spendings;
 
   } catch (error) {
