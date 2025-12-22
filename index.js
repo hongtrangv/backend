@@ -8,6 +8,7 @@ const metaDataRoutes = require('./routes/metadata');
 const bookRoutes = require('./routes/books'); // Import the new book routes
 const searchRoutes = require('./routes/search');
 const redisClient = require('./db/redis');
+const spendindRoutes = require('./routes/spending');
 // const db = require('./db/firestore');
 
 const app = express();
@@ -34,7 +35,7 @@ app.use('/api/books', bookRoutes);
 app.use('/api/genres', genreRoutes);
 app.use('/api/metadata', metaDataRoutes);
 app.use('/api/search', searchRoutes);
-
+app.use('/api/spending',spendindRoutes);
 // Start the server
 app.listen(port, () => {
   console.log(`Example app listening on port ${port}`);
