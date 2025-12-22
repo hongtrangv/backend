@@ -3,29 +3,45 @@ const logger = require('../utils/logger');
 
 const getSpending = async (year, month, type) => {
   try {
-    // Year and month are required to locate the collection of spendings.
-    if (!year || !month) {
-      throw new Error('Year and month parameters are required.');
+    // Year, month, and type are all required to locate the document.
+    if (!year || !month || !type) {
+      throw new Error('Year, month, and type parameters are required.');
     }
 
-    let query = db.collection('Year').doc(String(year)).collection('Months').doc(String(month)).collection('Types');
-
-    if (type) {
-      query = query.where('type', '==', type);
+    // The 'type' must be either 'Thu' (income) or 'Chi' (expense).
+    if (type !== 'Thu' && type !== 'Chi') {
+        logger.warn(`Invalid type specified: ${type}. Must be 'Thu' or 'Chi'.`);
+        return []; // Return empty if the type is invalid.
     }
 
-    const snapshot = await query.get();
-    const spendings = [];
-    snapshot.forEach(doc => {
-      spendings.push({ id: doc.id, ...doc.data() });
-    });
+    // Construct the reference to the specific document ('Thu' or 'Chi').
+    const docRef = db.collection('Year').doc(String(year))
+                     .collection('Months').doc(String(month))
+                     .collection('Types').doc(type);
 
-    logger.info(`Successfully fetched ${spendings.length} spending items.`);
+    const doc = await docRef.get();
+
+    if (!doc.exists) {
+      logger.info(`Document not found for type '${type}' in ${month}/${year}.`);
+      return []; // Return an empty array if the document doesn't exist.
+    }
+
+    // Assuming the array of records is stored in a field named 'records'.
+    // If your field has a different name, please change 'records' here.
+    const data = doc.data();
+    const spendings = data.records || [];
+
+    if (!Array.isArray(spendings)) {
+        logger.error(`The 'records' field for type '${type}' in ${month}/${year} is not an array.`);
+        return [];
+    }
+
+    logger.info(`Successfully fetched ${spendings.length} items from document '${type}' for ${month}/${year}.`);
     return spendings;
 
   } catch (error) {
     logger.error(`Error in getSpending service: ${error.message}`);
-    // Rethrow the error to be caught by the route handler
+    // Rethrow the error to be handled by the API route.
     throw error;
   }
 };
