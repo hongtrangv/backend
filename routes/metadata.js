@@ -2,35 +2,33 @@
 const express = require('express');
 const router = express.Router();
 const metadataService = require('../services/metadataService');
-const ApiResponse = require('../utils/apiResponse');
+const { apiOk, apiError } = require('../utils/apiResponse');
 
 router.get('/:documentName', async (req, res) => {
-    const response = new ApiResponse(res);
     try {
         const { documentName } = req.params;
         const version = await metadataService.getVersion(documentName);
         if (version !== null) {
-            response.success({ documentName, version });
+            apiOk(res, { documentName, version });
         } else {
-            response.notFound(`Metadata for '${documentName}' not found.`);
+            apiError(res, `Metadata for '${documentName}' not found.`, 404);
         }
     } catch (error) {
-        response.error(error.message);
+        apiError(res, error.message);
     }
 });
 
 router.put('/:documentName', async (req, res) => {
-    const response = new ApiResponse(res);
     try {
         const { documentName } = req.params;
         const { version } = req.body;
         if (!version) {
-            return response.error("Version is required in the request body.");
+            return apiError(res, "Version is required in the request body.");
         }
         await metadataService.updateVersion(documentName, version);
-        response.success({ documentName, version });
+        apiOk(res, { documentName, version });
     } catch (error) {
-        response.error(error.message);
+        apiError(res, error.message);
     }
 });
 

@@ -1,33 +1,19 @@
-class ApiResponse {
-    constructor(res) {
-        this.res = res;
-    }
+const apiOk = (res, data, message = 'Success', statusCode = 200) => {
+  res.status(statusCode).json({
+    success: true,
+    message,
+    data,
+  });
+};
 
-    success(data, statusCode = 200) {
-        this.res.status(statusCode).json({
-            success: true,
-            data: data
-        });
-    }
+const apiError = (res, message = 'An error occurred', statusCode = 400) => {
+  res.status(statusCode).json({
+    success: false,
+    error: message,
+  });
+};
 
-    created(data) {
-        this.success(data, 201);
-    }
-
-    noContent() {
-        this.res.status(204).send();
-    }
-
-    error(message, statusCode = 400) {
-        this.res.status(statusCode).json({
-            success: false,
-            error: message
-        });
-    }
-
-    notFound(message = 'Resource not found') {
-        this.error(message, 404);
-    }
-}
-
-module.exports = ApiResponse;
+module.exports = {
+  apiOk,
+  apiError,
+};

@@ -1,17 +1,16 @@
 const express = require('express');
 const router = express.Router();
-const ApiResponse = require('../utils/apiResponse');
+const { apiOk, apiError } = require('../utils/apiResponse');
 const embeddingService = require('../services/embeddingService');
 const bookService = require('../services/bookService');
 const axios = require('axios');
 const logger = require('../utils/logger');
 
 router.get('/', async (req, res) => {
-  const apiResponse = new ApiResponse(res);
   try {
     const query = req.query.q;
     if (!query) {
-      return apiResponse.error('Search query is required', 400);
+      return apiError(res, 'Search query is required', 400);
     }
 
     // 1. Perform search using the embedding service on local data
@@ -42,7 +41,7 @@ router.get('/', async (req, res) => {
         .filter(Boolean);
 
       if (enrichedResults.length > 0) {
-        return apiResponse.success(enrichedResults);
+        return apiOk(res, enrichedResults);
       }
     }
 
@@ -51,7 +50,7 @@ router.get('/', async (req, res) => {
     const response = await axios.get(`https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(query)}`);
 
     if (!response.data.items) {
-      return apiResponse.success([]); // No results from Google either
+      return apiOk(res, []); // No results from Google either
     }
 
     const books = response.data.items.map(item => ({
@@ -64,11 +63,11 @@ router.get('/', async (req, res) => {
       source: 'google_books_api'
     }));
 
-    return apiResponse.success(books);
+    return apiOk(res, books);
 
   } catch (err) {
     logger.error(`Search failed: ${err.message}`);
-    return apiResponse.error('Internal Server Error', 500);
+    return apiError(res, 'Internal Server Error', 500);
   }
 });
 
