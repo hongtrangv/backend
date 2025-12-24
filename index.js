@@ -9,6 +9,8 @@ const bookRoutes = require('./routes/books'); // Import the new book routes
 const searchRoutes = require('./routes/search');
 const redisClient = require('./db/redis');
 const spendindRoutes = require('./routes/spending');
+const authRoutes = require('./routes/auth'); // Import the new auth routes
+const userRoutes = require('./routes/user'); // Import the new user routes
 // const db = require('./db/firestore');
 
 const app = express();
@@ -26,7 +28,11 @@ app.get('/', (req, res) => {
   res.send('Hello World! Your app is now refactored!');
 });
 
-// Apply basic authentication to all API routes
+// Auth and User routes
+app.use('/api/auth', authRoutes);
+app.use('/api/users', userRoutes);
+
+// Apply basic authentication to all other API routes
 app.use('/api', basicAuth);
 
 // API Routes

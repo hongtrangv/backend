@@ -1,0 +1,155 @@
+const bcrypt = require('bcrypt');
+const asyncLocalStorage = require('../utils/context');
+const logger = require('../utils/logger');
+const db = require('../db/firestore');
+
+/**
+ * Fetches menus and submenus for a given role from Firestore.
+ * @param {string} role - The user's role.
+ * @returns {Array} - An array of menu objects with nested submenus.
+ */
+async function getMenusForRole(role) {
+    if (!role) return [];
+
+    const roleRef = db.collection('roles').doc(role);
+    const roleDoc = await roleRef.get();
+
+    if (!roleDoc.exists) {
+        logger.warn(`Role "${role}" not found in database.`);
+        return [];
+    }
+
+    const menuIds = roleDoc.data().menus || [];
+    if (menuIds.length === 0) return [];
+
+    const menuPromises = menuIds.map(id => db.collection('menus').doc(id).get());
+    const menuDocs = await Promise.all(menuPromises);
+
+    const menus = [];
+    for (const menuDoc of menuDocs) {
+        if (menuDoc.exists) {
+            const menuData = menuDoc.data();
+
+            if (menuData.hasSubMenu) {
+                // Assuming submenus are in a subcollection named 'subMenus'
+                const subMenusRef = menuDoc.ref.collection('subMenus');
+                const subMenuSnapshot = await subMenusRef.get();
+                menuData.subMenus = subMenuSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+            }
+            menus.push({ id: menuDoc.id, ...menuData });
+        }
+    }
+    return menus;
+}
+
+/**
+ * Registers a new user.
+ * @param {string} username - The username.
+ * @param {string} password - The password.
+ * @param {string} role - The user's role.
+ * @returns {object} - The newly created user.
+ * @throws {Error} - If the user already exists.
+ */
+const registerUser = async (username, password, role) => {
+  const userRef = db.collection('users').doc(username);
+  const doc = await userRef.get();
+
+  if (doc.exists) {
+    throw new Error('User already exists');
+  }
+
+  const salt = await bcrypt.genSalt(10);
+  const hashedPassword = await bcrypt.hash(password, salt);
+
+  await userRef.set({
+    username,
+    password: hashedPassword,
+    role,
+  });
+
+  logger.info(`User '${username}' registered successfully.`);
+  return { username, role };
+};
+
+/**
+ * Fetches all roles from Firestore.
+ * @returns {Array} - An array of role objects.
+ */
+const getRoles = async () => {
+  const rolesRef = db.collection('roles');
+  const snapshot = await rolesRef.get();
+
+  if (snapshot.empty) {
+    return [];
+  }
+
+  const roles = [];
+  snapshot.forEach(doc => {
+    roles.push({ id: doc.id, ...doc.data() });
+  });
+
+  return roles;
+};
+
+
+/**
+ * Logs in a user.
+ * @param {string} username - The username.
+ * @param {string} password - The password.
+ * @returns {object} - An object containing user information and menus if successful.
+ * @throws {Error} - If login fails.
+ */
+const login = async (username, password) => {
+  try {
+    const userRef = db.collection('users').doc(username);
+    const userDoc = await userRef.get();
+
+    if (!userDoc.exists) {
+      logger.warn(`Failed login attempt for user: ${username}. User not found.`);
+      throw new Error('Invalid credentials');
+    }
+
+    const userData = userDoc.data();
+    const isMatch = await bcrypt.compare(password, userData.password);
+
+    if (isMatch) {
+      logger.info(`User '${username}' logged in successfully.`);
+      
+      const role = userData.role;
+      const menus = await getMenusForRole(role);
+
+      const userContext = {
+        username: userData.username,
+        role: role,
+        menus: menus
+      };
+      return userContext;
+    } else {
+      logger.warn(`Failed login attempt for user: ${username}. Invalid password.`);
+      throw new Error('Invalid credentials');
+    }
+  } catch (error) {
+    logger.error('Error during login:', error);
+    throw new Error('Authentication failed.');
+  }
+};
+
+/**
+ * Gets the current user context.
+ * This is a placeholder for how we might retrieve context.
+ * In a real app, this would come from a session or token middleware.
+ */
+const getUserContext = () => {
+  const store = asyncLocalStorage.getStore();
+  if (store && store.user) {
+    return store.user;
+  }
+  return null; // No user context found
+};
+
+module.exports = {
+  login,
+  getUserContext,
+  registerUser,
+  getRoles,
+};
