@@ -22,18 +22,25 @@ const basicAuth = async (req, res, next) => {
   const decodedCredentials = Buffer.from(credentials, 'base64').toString('utf8');
   const [username, password] = decodedCredentials.split(':');
 
-  try {
-    const userContext = await authService.login(username, password);
+  // Lấy username và password mong muốn từ biến môi trường
+  const expectedUsername = process.env.API_USERNAME;
+  const expectedPassword = process.env.API_PASSWORD;
+
+  if (!expectedUsername || !expectedPassword) {
+      logger.error('API_USERNAME or API_PASSWORD not set in environment variables.');
+      // Không tiết lộ chi tiết cấu hình máy chủ cho client
+      return res.status(500).json({ message: 'Internal Server Error: Authentication not configured.' });
+  }
+
+  // So sánh thông tin xác thực
+  if (username === expectedUsername && password === expectedPassword) {
     logger.info(`Authenticated user: ${username}`);
-    
-    // Store user context for the duration of the request
-    asyncLocalStorage.run({ user: userContext }, () => {
-      next();
-    });
-  } catch (error) {
-    logger.warn(`Failed authentication attempt for user: ${username}. Reason: ${error.message}`);
+    // Nếu hợp lệ, cho phép yêu cầu đi tiếp
+    return next();
+  } else {
+    logger.warn(`Failed authentication attempt for user: ${username}`);
     res.setHeader('WWW-Authenticate', 'Basic realm="restricted area"');
-    return res.status(401).json({ message: `Unauthorized: ${error.message}` });
+    return res.status(401).json({ message: 'Unauthorized: Invalid credentials' });
   }
 };
 
