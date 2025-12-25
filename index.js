@@ -30,9 +30,7 @@ app.get('/', (req, res) => {
   res.send('Hello World! Your app is now refactored!');
 });
 
-// Auth and User routes
-app.use('/api/auth', authRoutes);
-app.use('/api/users', userRoutes);
+
 
 // Apply basic authentication to all other API routes
 app.use('/api', basicAuth);
@@ -45,6 +43,9 @@ app.use('/api/metadata', metaDataRoutes);
 app.use('/api/search', searchRoutes);
 app.use('/api/spending',spendindRoutes);
 app.use('/api/tasks', taskRoutes);
+// Auth and User routes
+app.use('/api/auth', authRoutes);
+app.use('/api/users', userRoutes);
 
 // Start the server
 app.listen(port, () => {
