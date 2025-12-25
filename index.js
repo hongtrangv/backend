@@ -33,7 +33,7 @@ app.get('/', (req, res) => {
 // Auth and User routes
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
-app.use('/api/tasks', taskRoutes);
+
 // Apply basic authentication to all other API routes
 app.use('/api', basicAuth);
 
@@ -44,7 +44,7 @@ app.use('/api/genres', genreRoutes);
 app.use('/api/metadata', metaDataRoutes);
 app.use('/api/search', searchRoutes);
 app.use('/api/spending',spendindRoutes);
-
+app.use('/api/tasks', taskRoutes);
 
 // Start the server
 app.listen(port, () => {
