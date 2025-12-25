@@ -11,6 +11,8 @@ const redisClient = require('./db/redis');
 const spendindRoutes = require('./routes/spending');
 const authRoutes = require('./routes/auth'); // Import the new auth routes
 const userRoutes = require('./routes/user'); // Import the new user routes
+const taskRoutes = require('./routes/tasks'); // Import the new task routes
+
 // const db = require('./db/firestore');
 
 const app = express();
@@ -42,6 +44,8 @@ app.use('/api/genres', genreRoutes);
 app.use('/api/metadata', metaDataRoutes);
 app.use('/api/search', searchRoutes);
 app.use('/api/spending',spendindRoutes);
+app.use('/api/tasks', taskRoutes);
+
 // Start the server
 app.listen(port, () => {
   console.log(`Example app listening on port ${port}`);
