@@ -19,7 +19,7 @@ const createTaskQuery = async (taskData) => {
   const taskToAdd = { description, assignee, isView, date, complete };
 
   try {
-    const docRef = await db.collection('task').add(taskToAdd);
+    const docRef = await db.collection('tasks').add(taskToAdd);
     logger.info('Task document written with ID: ', docRef.id);
     return { id: docRef.id, ...taskToAdd };
   } catch (error) {
