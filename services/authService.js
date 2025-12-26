@@ -50,7 +50,7 @@ async function getMenusForRole(role) {
  * @returns {object} - The newly created user.
  * @throws {Error} - If the user already exists.
  */
-const registerUser = async (username, password, role) => {
+const registerUser = async (username, password, role, fullname) => {
   const userRef = db.collection('users').doc(username);
   const doc = await userRef.get();
 
@@ -63,6 +63,7 @@ const registerUser = async (username, password, role) => {
 
   await userRef.set({
     username,
+    fullname,
     password: hashedPassword,
     role,
   });
@@ -120,6 +121,7 @@ const login = async (username, password) => {
 
       const userContext = {
         username: userData.username,
+        fullname: userData.fullname,        
         role: role,
         menus: menus
       };
