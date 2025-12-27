@@ -101,7 +101,8 @@ const login = async (username, password) => {
       
       const role = userData.role;
       const menus = await getMenusForRole(role);
-
+      logger.info(`Fetched menus for role: ${role}`);
+      logger.info(`Menus: ${JSON.stringify(menus)}`);
       const userContext = {
         username: userData.username,
         fullname: userData.fullname,        
