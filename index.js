@@ -12,6 +12,7 @@ const spendindRoutes = require('./routes/spending');
 const authRoutes = require('./routes/auth'); // Import the new auth routes
 const userRoutes = require('./routes/user'); // Import the new user routes
 const taskRoutes = require('./routes/tasks'); // Import the new task routes
+const menuRoutes = require('./routes/menu'); // Import the new menu routes
 
 // const db = require('./db/firestore');
 
@@ -43,6 +44,7 @@ app.use('/api/metadata', metaDataRoutes);
 app.use('/api/search', searchRoutes);
 app.use('/api/spending',spendindRoutes);
 app.use('/api/tasks', taskRoutes);
+app.use('/api/menu', menuRoutes); // Add menu routes
 // Auth and User routes
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);

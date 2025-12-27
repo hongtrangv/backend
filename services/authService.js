@@ -2,28 +2,7 @@ const bcrypt = require('bcrypt');
 const asyncLocalStorage = require('../utils/context');
 const logger = require('../utils/logger');
 const db = require('../db/firestore');
-
-/**
- * Fetches menus and submenus for a given role from Firestore.
- * @param {string} role - The user's role.
- * @returns {Array} - An array of menu objects with nested submenus.
- */
-async function getMenusForRole(role) {
-    if (!role) return [];
-
-    const snapshot = await db
-    .collection("menu") // đổi thành tên collection của bạn
-    .where("permissions", "array-contains", role)
-    .get();
-
-    const results = snapshot.docs.map(doc => ({
-      id: doc.id,
-      ...doc.data()
-    }));
-
-    if (results.length === 0) return [];        
-    return results;
-}
+const { getMenusForRole } = require('./menuService');
 
 /**
  * Registers a new user.
@@ -132,6 +111,7 @@ const getUserContext = () => {
   }
   return null; // No user context found
 };
+
 
 module.exports = {
   login,
