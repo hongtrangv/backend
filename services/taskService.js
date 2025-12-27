@@ -59,7 +59,88 @@ const getTasksByAssigneeAndDate = async (assignee, date) => {
   }
 };
 
+/**
+ * Gets all tasks for a specific assignee.
+ * @param {string} assignee - The assignee of the tasks.
+ * @returns {Promise<Array<object>>} A list of tasks.
+ */
+const getTasksByAssignee = async (assignee) => {
+  logger.info(`Fetching all tasks for assignee: ${assignee}`);
+  try {
+    const tasksRef = db.collection('tasks');
+    const snapshot = await tasksRef.where('assignee', '==', assignee).get();
+
+    if (snapshot.empty) {
+      logger.info('No matching documents for this assignee.');
+      return [];
+    }
+
+    const tasks = [];
+    snapshot.forEach(doc => {
+      tasks.push({ id: doc.id, ...doc.data() });
+    });
+    return tasks;
+  } catch (error) {
+    logger.error('Error getting documents: ', error);
+    throw new Error('Could not retrieve tasks.');
+  }
+};
+
+/**
+ * Gets all uncompleted tasks.
+ * @returns {Promise<Array<object>>} A list of uncompleted tasks.
+ */
+const getUncompletedTasks = async () => {
+  logger.info(`Fetching all uncompleted tasks.`);
+  try {
+    const tasksRef = db.collection('tasks');
+    const snapshot = await tasksRef.where('complete', '==', false).get();
+
+    if (snapshot.empty) {
+      logger.info('No uncompleted tasks found.');
+      return [];
+    }
+
+    const tasks = [];
+    snapshot.forEach(doc => {
+      tasks.push({ id: doc.id, ...doc.data() });
+    });
+    return tasks;
+  } catch (error) {
+    logger.error('Error getting uncompleted tasks: ', error);
+    throw new Error('Could not retrieve uncompleted tasks.');
+  }
+};
+
+/**
+ * Updates the completion status of a task.
+ * @param {string} taskId - The ID of the task to update.
+ * @param {boolean} isComplete - The new completion status.
+ * @returns {Promise<object>} The updated task data.
+ */
+const updateTaskCompletion = async (taskId, isComplete) => {
+  logger.info(`Updating task ${taskId} to completion status: ${isComplete}`);
+  try {
+    const taskRef = db.collection('tasks').doc(taskId);
+    await taskRef.update({ complete: isComplete,completeDate: new Date() });
+    
+    const updatedDoc = await taskRef.get();
+    if (!updatedDoc.exists) {
+        throw new Error('Task not found after update.');
+    }
+    
+    logger.info(`Task ${taskId} updated successfully.`);
+    return { id: updatedDoc.id, ...updatedDoc.data() };
+  } catch (error) {
+    logger.error(`Error updating task ${taskId}: `, error);
+    throw new Error('Could not update task completion status.');
+  }
+};
+
 module.exports = {
   createTaskQuery,
   getTasksByAssigneeAndDate,
+  getTasksByAssignee,
+  getUncompletedTasks,
+  updateTaskCompletion,
 };
