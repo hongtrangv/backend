@@ -11,35 +11,18 @@ const db = require('../db/firestore');
 async function getMenusForRole(role) {
     if (!role) return [];
 
-    const roleRef = db.collection('roles').doc(role);
-    const roleDoc = await roleRef.get();
+    const snapshot = await db
+    .collection("menu") // đổi thành tên collection của bạn
+    .where("permissions", "array-contains", role)
+    .get();
 
-    if (!roleDoc.exists) {
-        logger.warn(`Role "${role}" not found in database.`);
-        return [];
-    }
+    const results = snapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data()
+    }));
 
-    const menuIds = roleDoc.data().menus || [];
-    if (menuIds.length === 0) return [];
-
-    const menuPromises = menuIds.map(id => db.collection('menus').doc(id).get());
-    const menuDocs = await Promise.all(menuPromises);
-
-    const menus = [];
-    for (const menuDoc of menuDocs) {
-        if (menuDoc.exists) {
-            const menuData = menuDoc.data();
-
-            if (menuData.hasSubMenu) {
-                // Assuming submenus are in a subcollection named 'subMenus'
-                const subMenusRef = menuDoc.ref.collection('subMenus');
-                const subMenuSnapshot = await subMenusRef.get();
-                menuData.subMenus = subMenuSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-            }
-            menus.push({ id: menuDoc.id, ...menuData });
-        }
-    }
-    return menus;
+    if (results.length === 0) return [];        
+    return results;
 }
 
 /**
