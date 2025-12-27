@@ -38,4 +38,13 @@ router.post('/register', async (req, res) => {
   }
 });
 
+router.get('/roles', async (req,res) => {
+  try{
+    const roles = await authService.getRoles();
+    apiOk(res, roles);
+  }catch(error){
+      apiError(res, 'Could not fetch roles', 500);
+  }
+});
+
 module.exports = router;
