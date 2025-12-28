@@ -116,6 +116,7 @@ const getUserContext = () => {
 */
 const getAllUsers = async () => {
   const usersRef = db.collection('users');
+  logger.info("usersRef: {usersRef}");
   const snapshot = await usersRef.get();
 
   if (snapshot.empty) {
