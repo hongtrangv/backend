@@ -38,6 +38,10 @@ router.post('/login', async (req, res) => {
       apiOk(res, userContext, 'Login successful');
     });
   } catch (error) {
+    if(error.message === 'User is not active'){
+      apiError(res, error.message, 403);
+      return;
+    }
     apiError(res, error.message, 401);
   }
 });

@@ -85,7 +85,31 @@ const getTasksByAssignee = async (assignee) => {
     throw new Error('Could not retrieve tasks.');
   }
 };
+/**
+ * 
+ * @param {*} createdBy 
+ */
+const getTaskCreateBy = async (createdBy) => {
+  logger.info(`Fetching all tasks for assignee: ${createdBy}`);
+  try {
+    const tasksRef = db.collection('tasks');
+    const snapshot = await tasksRef.where('createdBy', '==', createdBy).get();
 
+    if (snapshot.empty) {
+      logger.info('No matching documents for this createdBy.');
+      return [];
+    }
+
+    const tasks = [];
+    snapshot.forEach(doc => {
+      tasks.push({ id: doc.id, ...doc.data() });
+    });
+    return tasks;
+  } catch (error) {
+    logger.error('Error getting documents: ', error);
+    throw new Error('Could not retrieve tasks.');
+  }
+};
 /**
  * Gets all uncompleted tasks.
  * @returns {Promise<Array<object>>} A list of uncompleted tasks.

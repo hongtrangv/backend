@@ -74,5 +74,17 @@ router.put('/:taskId/complete', async (req, res) => {
         apiError(res, error.message, 500);
     }
 });
+/**
+ * Route to get all tasks created by a specific user.
+ */
+router.get('/:createdBy', async (req, res) => {
+    try {
+        const { createdBy } = req.params;
+        const tasks = await taskService.getTasksByCreatedBy(createdBy);
+        apiOk(res, tasks);
+    } catch (error) {
+        apiError(res, error.message, 500);
+    }
+});
 
 module.exports = router;

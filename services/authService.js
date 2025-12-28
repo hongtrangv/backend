@@ -77,11 +77,13 @@ const login = async (username, password) => {
 
     if (isMatch) {
       logger.info(`User '${username}' logged in successfully.`);
-      
+      if(!userData.isActive)
+      {
+        logger.warn(`User '${username}' is not active.`);
+        throw new Error('User is not active');
+      }
       const role = userData.role;
-      const menus = await getMenusForRole(role);
-      logger.info(`Fetched menus for role: ${role}`);
-      logger.info(`Menus: ${JSON.stringify(menus)}`);
+      const menus = await getMenusForRole(role);      
       const userContext = {
         username: userData.username,
         fullname: userData.fullname,        
@@ -128,11 +130,32 @@ const getAllUsers = async () => {
 
   return users;
 }
-
+const approvedUser = async (username) => {
+  try{
+    const userRef = db.collection('users').doc(username);
+    const userDoc = await userRef.get();
+    if (!userDoc.exists) {
+      logger.warn(`Failed approved attempt for user: ${username}. User not found.`);
+      throw new Error('Invalid credentials');
+    }
+    const userData = userDoc.data();
+    if(userData.isActive){
+      logger.warn(`User '${username}' is already approved.`);
+      throw new Error('User is already approved.');
+    }
+    userData.isActive = true;    
+    await userRef.update(userData);
+    logger.info(`User '${username}' approved successfully.`);
+  }catch(error){
+    logger.error('Error during approved:', error);
+    throw new Error('Approved failed.');
+  }
+}
 module.exports = {
   login,
   getUserContext,
   registerUser,
   getRoles,
   getAllUsers,
+  approvedUser,
 };
