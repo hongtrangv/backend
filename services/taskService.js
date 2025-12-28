@@ -167,4 +167,5 @@ module.exports = {
   getTasksByAssignee,
   getUncompletedTasks,
   updateTaskCompletion,
+  getTaskCreateBy,
 };
