@@ -115,11 +115,8 @@ const getUserContext = () => {
 * Lấy thông bộ user đang có trên hệ thống
 */
 const getAllUsers = async () => {
-  const usersRef = db.collection('users');
-  
-  const snapshot = await usersRef.get();
-  logger.info("Fetching users...");
-  logger.info("Snapshot:", snapshot);
+  const usersRef = db.collection('users').select("username,fullname,role");  
+  const snapshot = await usersRef.get();  
   if (snapshot.empty) {
     return [];
   }
