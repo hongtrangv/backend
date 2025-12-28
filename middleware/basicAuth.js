@@ -33,12 +33,9 @@ const basicAuth = async (req, res, next) => {
   }
 
   // So sánh thông tin xác thực
-  if (username === expectedUsername && password === expectedPassword) {
-    logger.info(`Authenticated user: ${username}`);
-    // Nếu hợp lệ, cho phép yêu cầu đi tiếp
+  if (username === expectedUsername && password === expectedPassword) {    
     return next();
-  } else {
-    logger.warn(`Failed authentication attempt for user: ${username}`);
+  } else {    
     res.setHeader('WWW-Authenticate', 'Basic realm="restricted area"');
     return res.status(401).json({ message: 'Unauthorized: Invalid credentials' });
   }
