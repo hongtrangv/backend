@@ -15,8 +15,8 @@ const createTaskQuery = async (taskData) => {
   logger.info('Creating task with data:', taskData);
 
   // Extract relevant fields from taskData to ensure no extra data is saved
-  const { description, assignee, isView, date, complete } = taskData;
-  const taskToAdd = { description, assignee, isView, date, complete };
+  const { description, assignee, isView, date, complete, expried} = taskData;
+  const taskToAdd = { description, assignee, isView, date, complete,expried };
 
   try {
     const docRef = await db.collection('tasks').add(taskToAdd);

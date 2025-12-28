@@ -47,4 +47,12 @@ router.get('/roles', async (req,res) => {
   }
 });
 
+router.get('/', async (req, res) => {
+    try {
+      const users = await authService.getAllUsers();
+      apiOk(res, users);
+    } catch (error) {
+        apiError(res, 'Could not fetch user', 500);
+    }
+  });
 module.exports = router;

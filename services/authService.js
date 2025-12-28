@@ -111,11 +111,29 @@ const getUserContext = () => {
   }
   return null; // No user context found
 };
+/*
+* Lấy thông bộ user đang có trên hệ thống
+*/
+const getAllUsers = async () => {
+  const usersRef = db.collection('users');
+  const snapshot = await usersRef.get();
 
+  if (snapshot.empty) {
+    return [];
+  }
+
+  const users = [];
+  snapshot.forEach(doc => {
+    roles.push({ id: doc.id, ...doc.data() });
+  });
+
+  return users;
+}
 
 module.exports = {
   login,
   getUserContext,
   registerUser,
   getRoles,
+  getAllUsers,
 };
