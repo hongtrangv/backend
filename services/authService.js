@@ -116,16 +116,17 @@ const getUserContext = () => {
 */
 const getAllUsers = async () => {
   const usersRef = db.collection('users');
-  logger.info("usersRef: {usersRef}");
+  
   const snapshot = await usersRef.get();
-
+  logger.info("Fetching users...");
+  logger.info("Snapshot:", snapshot);
   if (snapshot.empty) {
     return [];
   }
 
   const users = [];
   snapshot.forEach(doc => {
-    roles.push({ id: doc.id, ...doc.data() });
+    users.push({ id: doc.id, ...doc.data() });
   });
 
   return users;
