@@ -136,6 +136,7 @@ const getAllUsers = async () => {
  */
 const getUserByActive = async (active) => {
   try{
+    logger.info(`Get user by active: ${active}`);
     const usersRef = db.collection('users').where('isActive','==',active).select('username','fullname','role','isActive');  
     const snapshot = await usersRef.get();  
     if (snapshot.empty) {

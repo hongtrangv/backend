@@ -55,7 +55,14 @@ router.get('/', async (req, res) => {
         apiError(res, 'Could not fetch user', 500);
     }
   });
-
+/**
+ * @swagger
+ * /users/active/{active}:
+ *   get:
+ *     summary: Gets all users
+ *     tags: [Users]
+ *     parameters:
+ */
 router.get('/:active', async (req, res) => {
   try {
     const param = (req.params.active);
