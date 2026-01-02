@@ -55,4 +55,43 @@ router.get('/', async (req, res) => {
         apiError(res, 'Could not fetch user', 500);
     }
   });
+
+router.get('/:active', async (req, res) => {
+  try {
+    const param = (req.params.active);
+    const users = await authService.getUserByActive(param);
+    apiOk(res, users);
+  } catch (error) {
+      apiError(res, 'Could not fetch user', 500);
+  }
+});
+/**
+ * @swagger
+ * /users/approve/{username}:
+ *   put:
+ *     summary: Approves a user
+ *     tags: [Users]
+ *     parameters:
+ *       - in: path
+ *         name: username
+ *         required: true
+ *         description: The username of the user to approve
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: User approved successfully
+ *       404:
+ *         description: User not found
+ */
+router.put('/approve/:username', async (req, res) => {
+  try {
+    const username = req.params.username;
+    await authService.approvedUser(username);
+    apiOk(res, { message: 'User approved successfully' });
+  } catch (error) {
+      apiError(res, 'Could not fetch user', 500);
+  }
+});
+
 module.exports = router;
