@@ -136,9 +136,10 @@ const getAllUsers = async () => {
  */
 const getUserByActive = async (active) => {
   try{
-    const isActive = active === 'true';
-    logger.info(`Get user by active: ${active}`);    
-    const usersRef = db.collection('users').where('isActive','==',isActive).select('username','fullname','role','isActive');  
+    const isActive = active === 'true';        
+    const usersRef = db.collection('users')
+                      .where('isActive','==',isActive)
+                      .select('username','fullname','role','isActive');  
     const snapshot = await usersRef.get();  
     if (snapshot.empty) {
       return [];
@@ -160,20 +161,28 @@ const getUserByActive = async (active) => {
  * 
  * @param {} username 
  */
-const approvedUser = async (username) => {
+const approvedUser = async (username,role) => {
   try{
+    const roles = await getRoles();
+    const roleExists = roles.some(r => r.name === role);
+    if (!roleExists) {
+      throw new Error(`Role '${role}' does not exist.`);
+    }
     const userRef = db.collection('users').doc(username);
     const userDoc = await userRef.get();
     if (!userDoc.exists) {
       logger.warn(`Failed approved attempt for user: ${username}. User not found.`);
       throw new Error('Invalid credentials');
     }
+    
     const userData = userDoc.data();
     if(userData.isActive){
       logger.warn(`User '${username}' is already approved.`);
       throw new Error('User is already approved.');
     }
-    userData.isActive = true;    
+    userData.isActive = true;
+    userData.approvedAt = new Date();
+    userData.role = role        
     await userRef.update(userData);
     logger.info(`User '${username}' approved successfully.`);
   }catch(error){

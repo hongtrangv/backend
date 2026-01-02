@@ -96,10 +96,11 @@ router.get('/:active', async (req, res) => {
  *       404:
  *         description: User not found
  */
-router.put('/approve/:username', async (req, res) => {
+router.put('/approve/:username/:rolename', async (req, res) => {
   try {
     const username = req.params.username;
-    await authService.approvedUser(username);
+    const rolename = req.params.rolename;
+    await authService.approvedUser(username,rolename);
     apiOk(res, { message: 'User approved successfully' });
   } catch (error) {
       apiError(res, 'Could not fetch user', 500);
