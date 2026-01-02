@@ -29,9 +29,9 @@ const { apiOk, apiError } = require('../utils/apiResponse');
  *         description: User already exists
  */
 router.post('/register', async (req, res) => {
-  const { username, password } = req.body;
+  const { username, password, fullname } = req.body;
   try {
-    const newUser = await authService.registerUser(username, password, role);
+    const newUser = await authService.registerUser(username, password,fullname);
     apiOk(res, newUser, 'User registered successfully', 201);
   } catch (error) {
     apiError(res, error.message, 400);

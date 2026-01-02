@@ -7,12 +7,11 @@ const { getMenusForRole } = require('./menuService');
 /**
  * Registers a new user.
  * @param {string} username - The username.
- * @param {string} password - The password.
- * @param {string} role - The user's role.
+ * @param {string} password - The password. 
  * @returns {object} - The newly created user.
  * @throws {Error} - If the user already exists.
  */
-const registerUser = async (username, password, role, fullname) => {
+const registerUser = async (username, password, fullname) => {
   const userRef = db.collection('users').doc(username);
   const doc = await userRef.get();
 
