@@ -13,6 +13,7 @@ async function getMenusForRole(role) {
     .collection("menu") // đổi thành tên collection của bạn
     .where("permissions", "array-contains", role)
     .select('name','icon','path')
+    .orderBy("position","asc")
     .get();
 
     const results = snapshot.docs.map(doc => ({
