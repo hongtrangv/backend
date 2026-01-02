@@ -163,6 +163,8 @@ const getUserByActive = async (active) => {
  */
 const approvedUser = async (username,role) => {
   try{
+    logger.info(`Attempting to approve user: ${username}.`)
+    logger.info(`Role: ${role}.`);
     const roles = await getRoles();
     const roleExists = roles.some(r => r.name === role);
     if (!roleExists) {
