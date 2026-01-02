@@ -135,18 +135,23 @@ const getAllUsers = async () => {
  * @param {*} status 
  */
 const getUserByActive = async (active) => {
-  const usersRef = db.collection('users').where('isActive','==',active).select('username','fullname','role','isActive');  
-  const snapshot = await usersRef.get();  
-  if (snapshot.empty) {
-    return [];
+  try{
+    const usersRef = db.collection('users').where('isActive','==',active).select('username','fullname','role','isActive');  
+    const snapshot = await usersRef.get();  
+    if (snapshot.empty) {
+      return [];
+    }
+
+    const users = [];
+    snapshot.forEach(doc => {
+      users.push({ id: doc.id, ...doc.data() });
+    });
+
+    return users;
+  }catch(error){
+    logger.error('Error during getAllUsers:', error);
+    throw new Error('Authentication failed.');
   }
-
-  const users = [];
-  snapshot.forEach(doc => {
-    users.push({ id: doc.id, ...doc.data() });
-  });
-
-  return users;
 }
 
 /**
