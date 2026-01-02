@@ -25,8 +25,9 @@ const registerUser = async (username, password, fullname) => {
   await userRef.set({
     username,
     fullname,
-    password: hashedPassword
-  
+    password: hashedPassword,
+    isActive: false,    
+    createdAt: new Date()  
   });
 
   logger.info(`User '${username}' registered successfully.`);
