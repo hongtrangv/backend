@@ -63,7 +63,7 @@ router.get('/', async (req, res) => {
  *     tags: [Users]
  *     parameters:
  */
-router.get('/:active', async (req, res) => {
+router.get('/active', async (req, res) => {
   try {
     const param =(req.params.active);
     if(param !== 'true' && param !== 'false')
