@@ -8,7 +8,7 @@ const db = require('../db/firestore');
  */
 async function getMenusForRole(role) {
     if (!role) return [];
-
+    try{
     const snapshot = await db
     .collection("menu") // đổi thành tên collection của bạn
     .where("permissions", "array-contains", role)
@@ -23,6 +23,9 @@ async function getMenusForRole(role) {
 
     if (results.length === 0) return [];        
     return results;
+    }catch(error){
+        logger.error(`Error in getMenusForRole service: ${error.message}`);
+    }
 }
 
 /**
