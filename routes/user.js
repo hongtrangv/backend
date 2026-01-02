@@ -103,7 +103,7 @@ router.put('/approve/:username/:rolename', async (req, res) => {
     await authService.approvedUser(username,rolename);
     apiOk(res, { message: 'User approved successfully' });
   } catch (error) {
-      apiError(res, 'Could not fetch user', 500);
+      apiError(res, error.message, 500);
   }
 });
 
