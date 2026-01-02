@@ -65,7 +65,12 @@ router.get('/', async (req, res) => {
  */
 router.get('/:active', async (req, res) => {
   try {
-    const param = (req.params.active);
+    const param =(req.params.active);
+    if(param !== 'true' && param !== 'false')
+    {
+      apiError(res, 'Parameter active must be true or false', 400);
+      return;
+    }
     const users = await authService.getUserByActive(param);
     apiOk(res, users);
   } catch (error) {
