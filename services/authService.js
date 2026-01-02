@@ -31,7 +31,7 @@ const registerUser = async (username, password, fullname) => {
   });
 
   logger.info(`User '${username}' registered successfully.`);
-  return { username, role };
+  return { username};
 };
 
 /**
