@@ -21,7 +21,7 @@ router.post('/', async (req, res) => {
 router.get('/', async (req, res) => {
   try {
     const { assignee, date } = req.query;
-    if (!assignee || !date) {
+    if (!date) {
       return apiError(res, 'Assignee and date are required', 400);
     }
     const tasks = await taskService.getTasksByAssigneeAndDate(assignee, date);

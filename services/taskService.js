@@ -38,10 +38,12 @@ const getTasksByAssigneeAndDate = async (assignee, date) => {
   logger.info(`Fetching tasks for assignee: ${assignee} on date: ${date}`);
   try {
     const tasksRef = db.collection('tasks');
-    const snapshot = await tasksRef
-      .where('assignee', '==', assignee)
-      .where('date', '==', date)
-      .get();
+    let query = tasksRef.where('date', '==', date);
+      
+    if (assignee)
+      query = query.where('assignee', '==', assignee);
+
+    const snapshot = await query.get();
 
     if (snapshot.empty) {
       logger.info('No matching documents.');
