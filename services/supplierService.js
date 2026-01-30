@@ -6,7 +6,7 @@ const db = require('../db/firestore');
  */
 async function getSuppliers() {
   try {
-    const snapshot = await db.collection('prices').get();
+    const snapshot = await db.collection('suppliers').get();
     const uniqueSuppliers = [];
     snapshot.forEach(doc => {
       uniqueSuppliers.push({ id: doc.id, ...doc.data() });

@@ -13,14 +13,24 @@ const db = require('../db/firestore');
  */
 async function insertPrice(priceData) {
   try {
-    const { productName } = priceData;
+    const { productName, supplier } = priceData;
+
+    //#region xử lý tạo sản phẩm
     const productsRef = db.collection('products');
     const productQuery = await productsRef.where('name', '==', productName).get();
 
     if (productQuery.empty) {
       await productsRef.add({ name: productName });
     }
+    //#endregion
+    //#region Xử lý tạo nhà cung cấp
+    const suppliersRef = db.collection('products');
+    const suppliersQuery = await suppliersRef.where('name', '==', supplier).get();
 
+    if (suppliersQuery.empty) {
+      await suppliersRef.add({ name: supplier });
+    }
+    //#endregion
     const newPriceRef = await db.collection('prices').add(priceData);
     return { id: newPriceRef.id, ...priceData };
   } catch (error) {
