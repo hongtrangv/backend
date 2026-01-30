@@ -6,8 +6,11 @@ const db = require('../db/firestore');
  */
 async function getProducts() {
   try {
-    const snapshot = await db.collection('products').get();
-    const products = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    const snapshot = await db.collection('products').get();    
+    const products = [];
+    snapshot.forEach(doc => {
+      products.push({ id: doc.id, ...doc.data() });
+    });
     return products;
   } catch (error) {
     console.error('Error retrieving products:', error);

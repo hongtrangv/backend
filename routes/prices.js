@@ -36,7 +36,7 @@ router.get('/compare/:productName', async (req, res) => {
 
 router.get('/products',async (req, res) => {
     try{
-        const products = await productService.getProducs();
+        const products = await productService.getProducts();
         apiOk(res, products);        
     } catch(error){
       apiError(res, error.message, 500);
