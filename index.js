@@ -13,6 +13,7 @@ const authRoutes = require('./routes/auth'); // Import the new auth routes
 const userRoutes = require('./routes/user'); // Import the new user routes
 const taskRoutes = require('./routes/tasks'); // Import the new task routes
 const menuRoutes = require('./routes/menu'); // Import the new menu routes
+const priceRoutes = require('./routes/prices'); // Import the new price routes
 
 // const db = require('./db/firestore');
 
@@ -45,6 +46,7 @@ app.use('/api/search', searchRoutes);
 app.use('/api/spending',spendindRoutes);
 app.use('/api/tasks', taskRoutes);
 app.use('/api/menu', menuRoutes); // Add menu routes
+app.use('/api/prices', priceRoutes);
 // Auth and User routes
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
