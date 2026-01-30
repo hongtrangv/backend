@@ -33,7 +33,7 @@ router.get('/compare/:productName', async (req, res) => {
   }
 });
 
-router.get('/product',async (req, res) => {
+router.get('/products',async (req, res) => {
     try{
         const products = await productService.getProducs();
         res.json(products);
@@ -44,7 +44,7 @@ router.get('/product',async (req, res) => {
 /*
 Lấy thông tin nhà cung cấp
 */
-router.get('/supplier',async (req, res) => {
+router.get('/suppliers',async (req, res) => {
     try{
         const products = await supplierService.getSuppliers();
         res.json(products);
