@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const priceService = require('../services/priceService');
 const productService = require('../services/productService');
+const supplierService = require('../services/supplierService');
 const { validatePrice } = require('../validators/priceValidator');
 
 router.post('/', validatePrice, async (req, res) => {
@@ -39,7 +40,16 @@ router.get('/product',async (req, res) => {
     } catch(error){
         res.status(500).json({ message: 'Error retrieving product', error });
     }
-}
-);
-
+});
+/*
+Lấy thông tin nhà cung cấp
+*/
+router.get('/supplier',async (req, res) => {
+    try{
+        const products = await supplierService.getSuppliers();
+        res.json(products);
+    } catch(error){
+        res.status(500).json({ message: 'Error retrieving product', error });
+    }
+});
 module.exports = router;

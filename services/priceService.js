@@ -68,8 +68,45 @@ async function getProductPrices(productName, orderBy = 'price', order = 'asc') {
   }
 }
 
+/**
+ * Searches for prices based on specified criteria.
+ * @param {object} searchCriteria - The criteria to filter prices.
+ * @param {string} [searchCriteria.productName] - The name of the product.
+ * @param {string} [searchCriteria.supplier] - The name of the supplier.
+ * @param {number} [searchCriteria.minPrice] - The minimum price.
+ * @param {number} [searchCriteria.maxPrice] - The maximum price.
+ * @returns {Promise<Array<object>>} A list of matching price records.
+ */
+async function searchPrices(searchCriteria) {
+  try {
+    let query = db.collection('prices');
+    const { productName, supplier, minPrice, maxPrice } = searchCriteria;
+
+    if (productName) {
+      query = query.where('productName', '==', productName);
+    }
+    if (supplier) {
+      query = query.where('supplier', '==', supplier);
+    }
+    if (minPrice) {
+      query = query.where('price', '>=', minPrice);
+    }
+    if (maxPrice) {
+      query = query.where('price', '<=', maxPrice);
+    }
+
+    const snapshot = await query.get();
+    const prices = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    return prices;
+  } catch (error) {
+    console.error('Error searching prices:', error);
+    throw error;
+  }
+}
+
 module.exports = {
   insertPrice,
   getPrices,
   getProductPrices,
+  searchPrices,
 };
