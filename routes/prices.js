@@ -36,9 +36,9 @@ router.get('/compare/:productName', async (req, res) => {
 router.get('/products',async (req, res) => {
     try{
         const products = await productService.getProducs();
-        res.json(products);
+        apiOk(res, products);        
     } catch(error){
-        res.status(500).json({ message: 'Error retrieving product', error });
+      apiError(res, error.message, 500);
     }
 });
 /*
@@ -46,10 +46,10 @@ Lấy thông tin nhà cung cấp
 */
 router.get('/suppliers',async (req, res) => {
     try{
-        const products = await supplierService.getSuppliers();
-        res.json(products);
+        const suppliers = await supplierService.getSuppliers();
+        apiOk(res, suppliers); 
     } catch(error){
-        res.status(500).json({ message: 'Error retrieving product', error });
+        apiError(res, error.message, 500);        
     }
 });
 module.exports = router;

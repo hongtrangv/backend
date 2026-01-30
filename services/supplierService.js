@@ -7,9 +7,12 @@ const db = require('../db/firestore');
 async function getSuppliers() {
   try {
     const snapshot = await db.collection('prices').get();
-    const suppliers = snapshot.docs.map(doc => doc.data().supplier);
-    const uniqueSuppliers = [...new Set(suppliers)];
+    const uniqueSuppliers = [];
+    snapshot.forEach(doc => {
+      uniqueSuppliers.push({ id: doc.id, ...doc.data() });
+    });
     return uniqueSuppliers;
+    
   } catch (error) {
     console.error('Error retrieving suppliers:', error);
     throw error;
