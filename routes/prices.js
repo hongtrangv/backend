@@ -4,11 +4,12 @@ const priceService = require('../services/priceService');
 const productService = require('../services/productService');
 const supplierService = require('../services/supplierService');
 const { validatePrice } = require('../validators/priceValidator');
+const { apiOk, apiError } = require('../utils/apiResponse');
 
 router.post('/', validatePrice, async (req, res) => {
   try {
     const newPrice = await priceService.insertPrice(req.body);
-    res.status(201).json(newPrice);
+    apiOk(res, newPrice);
   } catch (error) {
     res.status(500).json({ message: 'Error inserting price', error });
   }
@@ -17,7 +18,7 @@ router.post('/', validatePrice, async (req, res) => {
 router.get('/', async (req, res) => {
   try {
     const prices = await priceService.getPrices();
-    res.json(prices);
+    apiOk(res, prices);
   } catch (error) {
     res.status(500).json({ message: 'Error retrieving prices', error });
   }
@@ -27,7 +28,7 @@ router.get('/compare/:productName', async (req, res) => {
   try {
     const { productName } = req.params;
     const prices = await priceService.comparePrices(productName);
-    res.json(prices);
+    apiOk(res, prices);       
   } catch (error) {
     res.status(500).json({ message: 'Error comparing prices', error });
   }
