@@ -4,23 +4,23 @@ const db = require('../db/firestore');
  * Inserts a new price record into the database.
  * If the product does not exist in the 'products' collection, it will be created.
  * @param {object} priceData - The data for the new price.
- * @param {string} priceData.productName - The name of the product.
+ * @param {string} priceData.product_name - The name of the product.
  * @param {number} priceData.price - The price of the product.
- * @param {Date} priceData.promotionDate - The date of the promotion.
+ * @param {Date} priceData.effective_date - The date of the promotion.
  * @param {string} priceData.quotingUnit - The quoting unit.
  * @param {string} priceData.supplier - The name of the supplier.
  * @returns {Promise<object>} The newly created price record.
  */
 async function insertPrice(priceData) {
   try {
-    const { productName, supplier } = priceData;
+    const { product_name, supplier } = priceData;
 
     //#region xử lý tạo sản phẩm
     const productsRef = db.collection('products');
-    const productQuery = await productsRef.where('name', '==', productName).get();
+    const productQuery = await productsRef.where('name', '==', product_name).get();
 
     if (productQuery.empty) {
-      await productsRef.add({ name: productName });
+      await productsRef.add({ name: product_name });
     }
     //#endregion
     //#region Xử lý tạo nhà cung cấp
@@ -56,14 +56,14 @@ async function getPrices() {
 
 /**
  * Retrieves and sorts the prices for a specific product.
- * @param {string} productName - The name of the product.
+ * @param {string} product_name - The name of the product.
  * @param {string} [orderBy='price'] - The field to sort by.
  * @param {string} [order='asc'] - The sort order ('asc' or 'desc').
  * @returns {Promise<Array<object>>} A sorted list of price records for the product.
  */
 async function getProductPrices(productName, orderBy = 'price', order = 'asc') {
   try {
-    let query = db.collection('prices').where('productName', '==', productName);
+    let query = db.collection('prices').where('product_name', '==', productName);
 
     if (orderBy) {
       query = query.orderBy(orderBy, order);
@@ -93,7 +93,7 @@ async function searchPrices(searchCriteria) {
     const { productName, supplier, minPrice, maxPrice } = searchCriteria;
 
     if (productName) {
-      query = query.where('productName', '==', productName);
+      query = query.where('product_name', '==', productName);
     }
     if (supplier) {
       query = query.where('supplier', '==', supplier);
