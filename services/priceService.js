@@ -24,7 +24,7 @@ async function insertPrice(priceData) {
     }
     //#endregion
     //#region Xử lý tạo nhà cung cấp
-    const suppliersRef = db.collection('products');
+    const suppliersRef = db.collection('suppliers');
     const suppliersQuery = await suppliersRef.where('name', '==', supplier).get();
 
     if (suppliersQuery.empty) {
